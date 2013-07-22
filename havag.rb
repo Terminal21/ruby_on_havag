@@ -9,26 +9,25 @@ class Havag
 
     def initialize
         @hclnt = HavagClient.new('http://83.221.237.42:20010')
-        @body = nil
     end
 
     #private method
-    def retval
-    	@hres = @hclnt.request(@body)
-        return @hres.to_a
+    def get(body)
+    	hres = @hclnt.request(body)
+        return hres
     end
 
     def getNextTrains
 	#Erfraget alle nächsten Bahnen am Reileck        
-	@body = [0x63, 0x00, 0x01, 0x6d, 0x00, 0x14, 0x67, 0x65, 0x74, 0x44, 0x65, 0x70, 0x61, 0x72, 0x74, 0x75, 0x72, 0x65, 0x73, 0x46, 0x6f, 0x72, 0x53, 0x74, 0x6f, 0x70, 0x53, 0x00, 0x07, 0x52, 0x65, 0x69, 0x6c, 0x65, 0x63, 0x6b, 0x7a]        
-        self.retval    
+	body = [0x63, 0x00, 0x01, 0x6d, 0x00, 0x14, 0x67, 0x65, 0x74, 0x44, 0x65, 0x70, 0x61, 0x72, 0x74, 0x75, 0x72, 0x65, 0x73, 0x46, 0x6f, 0x72, 0x53, 0x74, 0x6f, 0x70, 0x53, 0x00, 0x07, 0x52, 0x65, 0x69, 0x6c, 0x65, 0x63, 0x6b, 0x7a]        
+        return self.get(body).to_a
     end
 
     #Ergebnis ev. als Enumeration für vorhandene Eingabe der getNextTrains-method
     def getAllStops
 	#Gibt alle Haltestellen der Havag zurück
-	@body = [0x63, 0x00, 0x01, 0x6d, 0x00, 0x0c, 0x67, 0x65, 0x74, 0x53, 0x74, 0x6f, 0x70, 0x43, 0x6f, 0x64, 0x65, 0x73, 0x7a]
-       	self.retval
+	body = [0x63, 0x00, 0x01, 0x6d, 0x00, 0x0c, 0x67, 0x65, 0x74, 0x53, 0x74, 0x6f, 0x70, 0x43, 0x6f, 0x64, 0x65, 0x73, 0x7a]
+       	return self.get(body).to_a
     end
 end
 
@@ -42,9 +41,6 @@ class HavagClient
     end
 
     def request(bytestream)
-        puts @server
-        puts bytestream
-        puts @@headers
         res = @clnt.post(@server + "/init/rtpi", (bytestream.map{ |c| c.chr}).join, @@headers)
         return HavagResponse.new(res.content)
     end
@@ -60,7 +56,9 @@ class HavagResponse < String
         data = Array.new
         output = Array.new
 
-        self.bytes{ |b| data.push(b) }
+	self.encode!("ISO-8859-15", "UTF-8")
+        self.bytes{ |b| 
+            data.push(b) }
 
         while data.length > 3 do
             if data[0] == @@rsplit[0] and data[1] == @@rsplit[1] and data[2] == @@rsplit[2] then
@@ -79,7 +77,7 @@ class HavagResponse < String
                 (1..data.shift).each do |c|
                     value += data.shift.chr
                 end
-                output.last.push(value)
+                output.last.push(value.encode("UTF-8", "ISO-8859-15"))
                 next
             end
 
@@ -91,12 +89,8 @@ class HavagResponse < String
 end
 
 
-class Havag
-end
-
-
 if __FILE__ == $0
     havag = Havag.new
-    #puts havag.getNextTrains
-    puts havag.getAllStops
+    puts havag.getNextTrains
+    #puts havag.getAllStops
 end
