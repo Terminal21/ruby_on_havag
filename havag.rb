@@ -14,25 +14,40 @@ class Havag
 
     #private method
     def get(body)
-    	hres = @hclnt.request(body)
+        hres = @hclnt.request(body)
         return hres
     end
 
     def getNextTrains(station)
-	
-	body = [0x63, 0x00, 0x01, 0x6d, 0x00, 0x14, 0x67, 0x65, 0x74, 0x44, 0x65, 0x70, 0x61, 0x72, 0x74, 0x75, 0x72, 0x65, 0x73, 0x46, 0x6f, 0x72, 0x53, 0x74, 0x6f, 0x70, 0x53, 0x00]
-	body.push(station.length)
-	station.bytes{ |b| body.push(b) }	
-	body.push(0x7a)
+        body = [0x63, 0x00, 0x01, 0x6d, 0x00, 0x14, 0x67, 0x65,
+                0x74, 0x44, 0x65, 0x70, 0x61, 0x72, 0x74, 0x75,
+                0x72, 0x65, 0x73, 0x46, 0x6f, 0x72, 0x53, 0x74,
+                0x6f, 0x70, 0x53, 0x00]
+        body.push(station.length)
+        station.bytes{ |b| body.push(b) }
+        body.push(0x7a)
 
-        return self.get(body).to_a
+        result = Array.new
+        self.get(body).to_a.each do |train|
+            result.push({:line => train[0],
+                         :destination => train[1],
+                         :departure_real => DateTime.strptime(train[2], '%Y.%m.%d.%H:%M:%S'),
+                         :departure_sceduled => DateTime.strptime(train[3], '%Y.%m.%d.%H:%M:%S'),
+                         :low_floor => train[4],
+                         :cab_id => train[6]})
+        end
+
+        #return self.get(body).to_a
+        return result
     end
 
     #Ergebnis ev. als Enumeration für vorhandene Eingabe der getNextTrains-method
     def getAllStations
-	#Gibt alle Haltestellen der Havag zurück
-	body = [0x63, 0x00, 0x01, 0x6d, 0x00, 0x0c, 0x67, 0x65, 0x74, 0x53, 0x74, 0x6f, 0x70, 0x43, 0x6f, 0x64, 0x65, 0x73, 0x7a]
-       	return self.get(body).to_a
+        #Gibt alle Haltestellen der Havag zurück
+        body = [0x63, 0x00, 0x01, 0x6d, 0x00, 0x0c, 0x67, 0x65,
+                0x74, 0x53, 0x74, 0x6f, 0x70, 0x43, 0x6f, 0x64,
+                0x65, 0x73, 0x7a]
+        return self.get(body).to_a
     end
 end
 
@@ -61,7 +76,7 @@ class HavagResponse < String
         data = Array.new
         output = Array.new
 
-	self.encode!("ISO-8859-15", "UTF-8")
+        self.encode!("ISO-8859-15", "UTF-8")
         self.bytes{ |b| data.push(b) }
 
         while data.length > 3 do
@@ -95,6 +110,6 @@ end
 
 if __FILE__ == $0
     havag = Havag.new
-    puts havag.getNextTrains("Berliner Brücke")
+    puts havag.getNextTrains("Reileck")
     #puts havag.getAllStations
 end
