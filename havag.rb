@@ -34,7 +34,8 @@ class Havag
                          :departure_real => DateTime.strptime(train[2], '%Y.%m.%d.%H:%M:%S'),
                          :departure_sceduled => DateTime.strptime(train[3], '%Y.%m.%d.%H:%M:%S'),
                          :low_floor => train[4],
-                         :cab_id => train[6]})
+                         :cab_id => train[6],
+                         :station => train[10]})
         end
 
         #return self.get(body).to_a
