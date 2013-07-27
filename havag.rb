@@ -39,7 +39,7 @@ class Havag
         end
 
         #return self.get(body).to_a
-        return result
+        return result.sort { |x, y| x[:departure_real] <=> y[:departure_real] }
     end
 
     #Ergebnis ev. als Enumeration für vorhandene Eingabe der getNextTrains-method
@@ -111,6 +111,6 @@ end
 
 if __FILE__ == $0
     havag = Havag.new
-    puts havag.getNextTrains("Reileck")
+    puts havag.getNextTrains("Talstraße")
     #puts havag.getAllStations
 end
