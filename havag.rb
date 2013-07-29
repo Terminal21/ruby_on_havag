@@ -111,6 +111,6 @@ end
 
 if __FILE__ == $0
     havag = Havag.new
-    puts havag.getNextTrains("Talstraße")
-    #puts havag.getAllStations
+    #puts havag.getNextTrains("Talstraße")
+    puts havag.getAllStations
 end
