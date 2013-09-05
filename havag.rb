@@ -32,7 +32,7 @@ class Havag
             result.push({:line => train[0],
                          :destination => train[1],
                          :departure_real => DateTime.strptime(train[2], '%Y.%m.%d.%H:%M:%S'),
-                         :departure_sceduled => DateTime.strptime(train[3], '%Y.%m.%d.%H:%M:%S'),
+                         :departure_scheduled => DateTime.strptime(train[3], '%Y.%m.%d.%H:%M:%S'),
                          :low_floor => train[4],
                          :cab_id => train[6],
                          :station => train[10]})
